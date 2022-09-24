@@ -4,7 +4,9 @@
   "description": "Assignment 2 API",
   "main": "node ./src/server.js",
   "scripts": {
-    "test": "echo \"Tests Complete\""
+    "start": "node ./src/server.js",
+    "pretest": "eslint ./src --fix",
+    "test": "echo \"Tests completed\""
   },
   "repository": {
     "type": "git",

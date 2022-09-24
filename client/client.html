@@ -1,13 +1,112 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <title>Our simple HTTP server</title>
   <link rel="stylesheet" type="text/css" href="/style.css">
-  
+
   <script>
 
+    
+    const handleResponse = async (response, parseResponse, obj) => {
+      const content = document.querySelector('#content');
+
+      switch (response.status) {
+        case 200:
+          content.innerHTML = `<b>Success</b>`;
+          break;
+        case 201:
+          content.innerHTML = `<b>Created</b>`;
+          break;
+        case 204:
+          content.innerHTML = `<b>Updated</b>`;
+          parseResponse = false;
+          break;
+        case 400:
+          content.innerHTML = `<b>Bad Request</b>`;
+          break;
+        case 404:
+          content.innerHTML = `<b>Not Found</b>`;
+          obj = true;
+          break;
+        default:
+          content.innerHTML = `Error code not implemented by client.`;
+          break;
+      }
+
+
+
+
+
+      if (parseResponse) {
+        const jsonResponse = await response.json();
+        if (obj) {
+          content.innerHTML += `<p>Message: ${jsonResponse.message}</p>`;
+        } else {
+          content.innerHTML += `<p>${JSON.stringify(jsonResponse.users)}</p>`;
+        }
+      }
+
+
+    };
+
+ 
+    const get = async (userForm) => {
+      const methodSelect = userForm.querySelector('#methodSelect').value;
+      const url = userForm.querySelector('#urlField').value;
+
+      let response = await fetch(url, {
+        method: methodSelect,
+        headers: {
+          'Content-type': 'application/json',
+          'Accept': 'application/json',
+        },
+      });
+
+      handleResponse(response, methodSelect !== 'head', false);
+    };
+
+
+    const post = async (nameForm) => {
+      const ageField = nameForm.querySelector('#ageField').value;
+      const nameMethod = nameForm.getAttribute('method').value;
+      const nameField = nameForm.querySelector('#nameField').value;
+    
+
+      let response = await fetch(`/addUser?name=${nameField}&age=${ageField}`, {
+        method: nameMethod,
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+        },
+      });
+
+      handleResponse(response, true, true);
+    };
+
+
+    const init = () => {
+      const nameForm = document.querySelector('#nameForm');
+      const userForm = document.querySelector('#userForm');
+
+      const getUser = (event) => {
+        event.preventDefault();
+        get(userForm);
+      }
+
+      const postUser = (event) => {
+        event.preventDefault();
+        post(nameForm);
+      }
+
+      nameForm.addEventListener('submit', postUser);
+      userForm.addEventListener('submit', getUser);
+    }
+
+    window.onload = init;
   </script>
 </head>
+
 <body>
   <section id="top">
     <h3>POST Status Code Tests</h3>
@@ -15,7 +114,7 @@
       <label for="name">Name: </label>
       <input id="nameField" type="text" name="name" />
       <label for="age">Age: </label>
-      <input id="ageField" type="number" name="age" min="0" max="100" step="1"/>
+      <input id="ageField" type="number" name="age" min="0" max="100" step="1" />
       <input type="submit" value="Add User" />
     </form>
     <form id="userForm" action="/getUsers" method="get">
@@ -33,4 +132,13 @@
   <section id="content">
   </section>
 </body>
+
 </html>
+
+
+
+
+
+
+
+
